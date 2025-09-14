@@ -26,7 +26,7 @@ export default function TLAddTask() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/api/projects/tl", {
+      const res = await API.get("/projects/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -37,7 +37,7 @@ export default function TLAddTask() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
@@ -50,7 +50,7 @@ export default function TLAddTask() {
     e.preventDefault();
     try {
       await API.post(
-        "/api/tasks",
+        "/tasks",
         {
           title: form.title,
           description: form.description,

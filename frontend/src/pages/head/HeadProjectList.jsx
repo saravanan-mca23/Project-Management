@@ -28,7 +28,7 @@ export default function HeadProjectList() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/api/projects", {
+      const res = await API.get("/projects", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -40,7 +40,7 @@ export default function HeadProjectList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        await API.delete(`/api/projects/${id}`, {
+        await API.delete(`/projects/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchProjects();

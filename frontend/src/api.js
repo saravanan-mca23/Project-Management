@@ -1,8 +1,9 @@
 // frontend/src/api.js
 import axios from "axios";
 
+// Use Vite environment variable
 const API = axios.create({
-  baseURL: process.env.REACT_APP_API_URL, // backend base URL
+  baseURL: import.meta.env.VITE_API_URL, // backend base URL
 });
 
 // Automatically attach token

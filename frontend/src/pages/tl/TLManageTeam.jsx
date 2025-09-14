@@ -21,7 +21,7 @@ export default function TLManageTeam() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter(u => u.role.toLowerCase() === "employee") || []);

@@ -34,7 +34,7 @@ export default function HeadDashboard() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/api/projects", {
+      const res = await API.get("/projects", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -45,7 +45,7 @@ export default function HeadDashboard() {
 
   const fetchTLs = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTls(res.data.filter((u) => u.role.toLowerCase() === "tl") || []);
@@ -59,13 +59,13 @@ export default function HeadDashboard() {
     try {
       if (editingId) {
         // Update project
-        await API.put(`/api/projects/${editingId}`, form, {
+        await API.put(`/projects/${editingId}`, form, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setEditingId(null);
       } else {
         // Create project
-        await API.post("/api/projects", form, {
+        await API.post("/projects", form, {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
@@ -89,7 +89,7 @@ export default function HeadDashboard() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        await API.delete(`/api/projects/${id}`, {
+        await API.delete(`/projects/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchProjects();

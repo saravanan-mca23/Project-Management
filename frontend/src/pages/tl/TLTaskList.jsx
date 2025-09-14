@@ -21,7 +21,7 @@ export default function TLTaskList() {
 
   const fetchTasks = async () => {
     try {
-      const res = await API.get("/api/tasks", {
+      const res = await API.get("/tasks", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data || []);
@@ -33,7 +33,7 @@ export default function TLTaskList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       try {
-        await API.delete(`/api/tasks/${id}`, {
+        await API.delete(`/tasks/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchTasks();

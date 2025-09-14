@@ -38,7 +38,7 @@ export default function TLDashboard() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/api/projects/tl", {
+      const res = await API.get("/projects/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -49,7 +49,7 @@ export default function TLDashboard() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
@@ -60,7 +60,7 @@ export default function TLDashboard() {
 
   const fetchTasks = async () => {
     try {
-      const res = await API.get("/api/tasks/tl", {
+      const res = await API.get("/tasks/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data || []);
@@ -72,7 +72,7 @@ export default function TLDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/api/tasks", form, {
+      await API.post("/tasks", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ title: "", description: "", projectId: "", employeeId: "" });
@@ -85,7 +85,7 @@ export default function TLDashboard() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       try {
-        await API.delete(`/api/tasks/${id}`, {
+        await API.delete(`/tasks/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchTasks();

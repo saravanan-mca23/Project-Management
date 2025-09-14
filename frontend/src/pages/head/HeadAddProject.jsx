@@ -23,7 +23,7 @@ export default function HeadAddProject() {
 
   const fetchTLs = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTls(res.data.filter((u) => u.role.toLowerCase() === "tl") || []);
@@ -35,7 +35,7 @@ export default function HeadAddProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/api/projects", form, {
+      await API.post("/projects", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ name: "", description: "", deadline: "", tlId: "" });

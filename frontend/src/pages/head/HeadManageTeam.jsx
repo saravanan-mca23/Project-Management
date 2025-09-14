@@ -25,7 +25,7 @@ export default function HeadManageTeam() {
 
   const fetchTLs = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTls(res.data.filter(u => u.role.toLowerCase() === "tl") || []);
@@ -36,7 +36,7 @@ export default function HeadManageTeam() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await API.get("/api/auth/all", {
+      const res = await API.get("/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter(u => u.role.toLowerCase() === "employee") || []);
@@ -48,7 +48,7 @@ export default function HeadManageTeam() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await API.delete(`/api/auth/${id}`, {
+        await API.delete(`/auth/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchTLs();
