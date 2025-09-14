@@ -1,6 +1,6 @@
 // frontend/src/pages/head/HeadProjectList.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
 import {
   HomeIcon,
@@ -28,7 +28,7 @@ export default function HeadProjectList() {
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/projects", {
+      const res = await API.get("/api/projects", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -40,7 +40,7 @@ export default function HeadProjectList() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/projects/${id}`, {
+        await API.delete(`/api/projects/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         fetchProjects();

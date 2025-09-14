@@ -1,6 +1,6 @@
 // frontend/src/pages/tl/TLAddTask.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
@@ -18,46 +18,46 @@ export default function TLAddTask() {
   ];
 
   useEffect(() => {
-    fetchProjects();
-    fetchEmployees();
-  }, []);
+    if (token) {
+      fetchProjects();
+      fetchEmployees();
+    }
+  }, [token]);
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/projects/tl", {
+      const res = await API.get("/api/projects/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch projects:", err);
     }
   };
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all", {
+      const res = await API.get("/api/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to fetch employees:", err);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(
-        "http://localhost:5000/api/tasks",
+      await API.post(
+        "/api/tasks",
         {
           title: form.title,
           description: form.description,
-          projectId: form.projectId, // backend expects this
-          employeeId: form.employeeId, // backend expects this
+          projectId: form.projectId,
+          employeeId: form.employeeId,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
 
       setForm({ title: "", description: "", projectId: "", employeeId: "" });
@@ -91,9 +91,7 @@ export default function TLAddTask() {
             >
               <option value="">Select Project</option>
               {projects.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.name}
-                </option>
+                <option key={p._id} value={p._id}>{p.name}</option>
               ))}
             </select>
             <textarea
@@ -110,9 +108,7 @@ export default function TLAddTask() {
             >
               <option value="">Assign to Employee</option>
               {employees.map((emp) => (
-                <option key={emp._id} value={emp._id}>
-                  {emp.name}
-                </option>
+                <option key={emp._id} value={emp._id}>{emp.name}</option>
               ))}
             </select>
             <button

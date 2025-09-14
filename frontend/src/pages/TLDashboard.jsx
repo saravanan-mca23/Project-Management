@@ -1,6 +1,6 @@
 // frontend/src/pages/TLDashboard.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../api"; // Use centralized API instance
 import Sidebar from "../components/Sidebar";
 import {
   HomeIcon,
@@ -29,14 +29,16 @@ export default function TLDashboard() {
   ];
 
   useEffect(() => {
-    fetchProjects();
-    fetchEmployees();
-    fetchTasks();
-  }, []);
+    if (token) {
+      fetchProjects();
+      fetchEmployees();
+      fetchTasks();
+    }
+  }, [token]);
 
   const fetchProjects = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/projects/tl", {
+      const res = await API.get("/api/projects/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProjects(res.data || []);
@@ -47,12 +49,10 @@ export default function TLDashboard() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all", {
+      const res = await API.get("/api/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setEmployees(
-        res.data.filter((u) => u.role.toLowerCase() === "employee") || []
-      );
+      setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
     } catch (err) {
       console.error("Failed to fetch employees:", err);
     }
@@ -60,7 +60,7 @@ export default function TLDashboard() {
 
   const fetchTasks = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/tasks/tl", {
+      const res = await API.get("/api/tasks/tl", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTasks(res.data || []);
@@ -72,13 +72,26 @@ export default function TLDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/tasks", form, {
+      await API.post("/api/tasks", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ title: "", description: "", projectId: "", employeeId: "" });
       fetchTasks();
     } catch (err) {
       console.error("Failed to assign task:", err);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm("Are you sure you want to delete this task?")) {
+      try {
+        await API.delete(`/api/tasks/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchTasks();
+      } catch (err) {
+        console.error("Failed to delete task:", err);
+      }
     }
   };
 
@@ -180,18 +193,7 @@ export default function TLDashboard() {
 
                   {/* Delete Button */}
                   <button
-                    onClick={async () => {
-                      if (window.confirm("Are you sure you want to delete this task?")) {
-                        try {
-                          await axios.delete(`http://localhost:5000/api/tasks/${task._id}`, {
-                            headers: { Authorization: `Bearer ${token}` },
-                          });
-                          fetchTasks();
-                        } catch (err) {
-                          console.error("Failed to delete task:", err);
-                        }
-                      }
-                    }}
+                    onClick={() => handleDelete(task._id)}
                     className="mt-4 px-4 py-2 rounded-lg text-white font-medium shadow-lg transition 
                       bg-gradient-to-r from-red-500/70 to-red-600/70 hover:from-red-500/90 hover:to-red-600/90 
                       backdrop-blur-md border border-red-400/30"

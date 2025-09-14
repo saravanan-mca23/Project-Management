@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Sidebar from "../../components/Sidebar";
+import API from "../../api"; // Use centralized API instance
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function HeadAddProject() {
@@ -22,7 +23,7 @@ export default function HeadAddProject() {
 
   const fetchTLs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all", {
+      const res = await API.get("/api/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTls(res.data.filter((u) => u.role.toLowerCase() === "tl") || []);
@@ -34,7 +35,7 @@ export default function HeadAddProject() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/projects", form, {
+      await API.post("/api/projects", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ name: "", description: "", deadline: "", tlId: "" });

@@ -1,7 +1,8 @@
+// frontend/src/pages/head/HeadManageTeam.jsx
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
-import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function HeadManageTeam() {
   const [tls, setTls] = useState([]);
@@ -16,13 +17,15 @@ export default function HeadManageTeam() {
   ];
 
   useEffect(() => {
-    fetchTLs();
-    fetchEmployees();
-  }, []);
+    if (token) {
+      fetchTLs();
+      fetchEmployees();
+    }
+  }, [token]);
 
   const fetchTLs = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all", {
+      const res = await API.get("/api/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTls(res.data.filter(u => u.role.toLowerCase() === "tl") || []);
@@ -33,7 +36,7 @@ export default function HeadManageTeam() {
 
   const fetchEmployees = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/auth/all", {
+      const res = await API.get("/api/auth/all", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setEmployees(res.data.filter(u => u.role.toLowerCase() === "employee") || []);
@@ -45,10 +48,9 @@ export default function HeadManageTeam() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
-        await axios.delete(`http://localhost:5000/api/auth/${id}`, {
+        await API.delete(`/api/auth/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        // Refresh both lists
         fetchTLs();
         fetchEmployees();
       } catch (err) {
