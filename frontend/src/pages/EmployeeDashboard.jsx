@@ -1,7 +1,7 @@
-// frontend/src/pages/EmployeeDashboard.jsx
 import React, { useEffect, useState } from "react";
 import Sidebar from "../components/Sidebar";
 import { useAuth } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
 export default function EmployeeDashboard() {
   const { API, user } = useAuth();
@@ -20,6 +20,7 @@ export default function EmployeeDashboard() {
       setTasks(res.data.filter((t) => t.assignedTo?._id === user._id));
     } catch (err) {
       console.error("❌ Failed to fetch tasks:", err.response?.data || err.message);
+      toast.error("Failed to fetch tasks");
     }
   };
 
@@ -33,9 +34,11 @@ export default function EmployeeDashboard() {
     try {
       setUpdatingTask(id); // show temporary text
       await API.put(`/tasks/${id}`, { status });
+      toast.success(`Task ${status === "in-progress" ? "started" : "completed"} successfully`);
       fetchTasks();
     } catch (err) {
       console.error("❌ Failed to update status:", err.response?.data || err.message);
+      toast.error("Failed to update task status");
     } finally {
       setUpdatingTask(null);
     }

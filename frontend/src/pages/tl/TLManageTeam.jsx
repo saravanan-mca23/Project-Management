@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
+import { toast } from "react-toastify";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function TLManageTeam() {
@@ -27,6 +28,7 @@ export default function TLManageTeam() {
       setEmployees(res.data.filter(u => u.role.toLowerCase() === "employee") || []);
     } catch (err) {
       console.error("Failed to fetch employees:", err);
+      toast.error("Failed to fetch team members");
     }
   };
 

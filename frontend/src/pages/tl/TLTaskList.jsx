@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
+import { toast } from "react-toastify";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 export default function TLTaskList() {
@@ -27,19 +28,22 @@ export default function TLTaskList() {
       setTasks(res.data || []);
     } catch (err) {
       console.error("Failed to fetch tasks:", err);
+      toast.error("Failed to fetch tasks");
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this task?")) {
-      try {
-        await API.delete(`/tasks/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchTasks();
-      } catch (err) {
-        console.error("Failed to delete task:", err);
-      }
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+    try {
+      await API.delete(`/tasks/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Task deleted successfully");
+      fetchTasks();
+    } catch (err) {
+      console.error("Failed to delete task:", err);
+      toast.error("Failed to delete task");
     }
   };
 

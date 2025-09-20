@@ -1,5 +1,8 @@
 import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
@@ -40,91 +43,107 @@ function PrivateRoute({ children, roles }) {
 
 export default function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
-
-      {/* Head Routes */}
-      <Route
-        path="/head"
-        element={
-          <PrivateRoute roles={["head"]}>
-            <HeadDashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/head/add"
-        element={
-          <PrivateRoute roles={["head"]}>
-            <HeadAddProject />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/head/projects"
-        element={
-          <PrivateRoute roles={["head"]}>
-            <HeadProjectList />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/head/team"
-        element={
-          <PrivateRoute roles={["head"]}>
-            <HeadManageTeam />
-          </PrivateRoute>
-        }
+    <>
+      {/* Toast container to show notifications */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
       />
 
-      {/* TL Routes */}
-      <Route
-        path="/tl"
-        element={
-          <PrivateRoute roles={["tl"]}>
-            <TLDashboard />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/tl/add-task"
-        element={
-          <PrivateRoute roles={["tl"]}>
-            <TLAddTask />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/tl/tasks"
-        element={
-          <PrivateRoute roles={["tl"]}>
-            <TLTaskList />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/tl/team"
-        element={
-          <PrivateRoute roles={["tl"]}>
-            <TLManageTeam />
-          </PrivateRoute>
-        }
-      />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
-      {/* Employee Routes */}
-      <Route
-        path="/employee"
-        element={
-          <PrivateRoute roles={["employee"]}>
-            <EmployeeDashboard />
-          </PrivateRoute>
-        }
-      />
+        {/* Head Routes */}
+        <Route
+          path="/head"
+          element={
+            <PrivateRoute roles={["head"]}>
+              <HeadDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/head/add"
+          element={
+            <PrivateRoute roles={["head"]}>
+              <HeadAddProject />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/head/projects"
+          element={
+            <PrivateRoute roles={["head"]}>
+              <HeadProjectList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/head/team"
+          element={
+            <PrivateRoute roles={["head"]}>
+              <HeadManageTeam />
+            </PrivateRoute>
+          }
+        />
 
-      {/* Default Route */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-    </Routes>
+        {/* TL Routes */}
+        <Route
+          path="/tl"
+          element={
+            <PrivateRoute roles={["tl"]}>
+              <TLDashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tl/add-task"
+          element={
+            <PrivateRoute roles={["tl"]}>
+              <TLAddTask />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tl/tasks"
+          element={
+            <PrivateRoute roles={["tl"]}>
+              <TLTaskList />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/tl/team"
+          element={
+            <PrivateRoute roles={["tl"]}>
+              <TLManageTeam />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Employee Routes */}
+        <Route
+          path="/employee"
+          element={
+            <PrivateRoute roles={["employee"]}>
+              <EmployeeDashboard />
+            </PrivateRoute>
+          }
+        />
+
+        {/* Default Route */}
+        <Route path="/" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </>
   );
 }

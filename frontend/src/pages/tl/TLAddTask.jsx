@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
+import { toast } from "react-toastify";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function TLAddTask() {
@@ -32,6 +33,7 @@ export default function TLAddTask() {
       setProjects(res.data || []);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
+      toast.error("Failed to fetch projects");
     }
   };
 
@@ -43,6 +45,7 @@ export default function TLAddTask() {
       setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
     } catch (err) {
       console.error("Failed to fetch employees:", err);
+      toast.error("Failed to fetch employees");
     }
   };
 
@@ -51,20 +54,14 @@ export default function TLAddTask() {
     try {
       await API.post(
         "/tasks",
-        {
-          title: form.title,
-          description: form.description,
-          projectId: form.projectId,
-          employeeId: form.employeeId,
-        },
+        { ...form },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
       setForm({ title: "", description: "", projectId: "", employeeId: "" });
-      alert("Task assigned successfully!");
+      toast.success("Task assigned successfully!");
     } catch (err) {
       console.error("Failed to assign task:", err);
-      alert("Failed to assign task: " + (err.response?.data?.message || err.message));
+      toast.error("Failed to assign task: " + (err.response?.data?.message || err.message));
     }
   };
 

@@ -1,23 +1,14 @@
-// frontend/src/pages/TLDashboard.jsx
 import { useEffect, useState } from "react";
-import API from "../api"; // Use centralized API instance
+import API from "../api";
 import Sidebar from "../components/Sidebar";
-import {
-  HomeIcon,
-  BriefcaseIcon,
-  PlusCircleIcon,
-  UserIcon,
-} from "@heroicons/react/24/outline";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function TLDashboard() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    projectId: "",   // must match backend
-    employeeId: "",  // must match backend
-  });
+  const [form, setForm] = useState({ title: "", description: "", projectId: "", employeeId: "" });
   const [employees, setEmployees] = useState([]);
   const token = localStorage.getItem("token");
 
@@ -38,83 +29,71 @@ export default function TLDashboard() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/projects/tl", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await API.get("/projects/tl", { headers: { Authorization: `Bearer ${token}` } });
       setProjects(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch projects:", err);
+      console.error(err);
+      toast.error("Failed to fetch projects");
     }
   };
 
   const fetchEmployees = async () => {
     try {
-      const res = await API.get("/auth/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await API.get("/auth/all", { headers: { Authorization: `Bearer ${token}` } });
       setEmployees(res.data.filter((u) => u.role.toLowerCase() === "employee") || []);
     } catch (err) {
-      console.error("Failed to fetch employees:", err);
+      console.error(err);
+      toast.error("Failed to fetch employees");
     }
   };
 
   const fetchTasks = async () => {
     try {
-      const res = await API.get("/tasks/tl", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await API.get("/tasks/tl", { headers: { Authorization: `Bearer ${token}` } });
       setTasks(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch tasks:", err);
+      console.error(err);
+      toast.error("Failed to fetch tasks");
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await API.post("/tasks", form, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await API.post("/tasks", form, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success("Task assigned successfully");
       setForm({ title: "", description: "", projectId: "", employeeId: "" });
       fetchTasks();
     } catch (err) {
-      console.error("Failed to assign task:", err);
+      console.error(err);
+      toast.error("Failed to assign task");
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       try {
-        await API.delete(`/tasks/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await API.delete(`/tasks/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success("Task deleted successfully");
         fetchTasks();
       } catch (err) {
-        console.error("Failed to delete task:", err);
+        console.error(err);
+        toast.error("Failed to delete task");
       }
     }
   };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-      {/* Sidebar */}
       <Sidebar links={links} />
 
-      {/* Main Content */}
       <main className="flex-1 p-8">
-        <h1 className="text-3xl font-extrabold mb-8 text-white">
-          Team Lead Dashboard
-        </h1>
+        <h1 className="text-3xl font-extrabold mb-8 text-white">Team Lead Dashboard</h1>
 
         {/* Assign Task Form */}
         <div className="bg-white/10 p-6 rounded-2xl shadow-md mb-10 backdrop-blur-md border border-white/20">
-          <h2 className="text-xl font-semibold text-emerald-400 mb-4">
-            Assign New Task
-          </h2>
-          <form
-            onSubmit={handleSubmit}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white"
-          >
+          <h2 className="text-xl font-semibold text-emerald-400 mb-4">Assign New Task</h2>
+          <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4 text-white">
             <input
               type="text"
               placeholder="Task Title"
@@ -131,9 +110,7 @@ export default function TLDashboard() {
             >
               <option value="" className="text-slate-700">Select Project</option>
               {projects.map((p) => (
-                <option key={p._id} value={p._id} className="text-slate-700">
-                  {p.name}
-                </option>
+                <option key={p._id} value={p._id} className="text-slate-700">{p.name}</option>
               ))}
             </select>
             <textarea
@@ -150,9 +127,7 @@ export default function TLDashboard() {
             >
               <option value="" className="text-slate-700">Assign to Employee</option>
               {employees.map((emp) => (
-                <option key={emp._id} value={emp._id} className="text-slate-700">
-                  {emp.name}
-                </option>
+                <option key={emp._id} value={emp._id} className="text-slate-700">{emp.name}</option>
               ))}
             </select>
             <button
@@ -170,28 +145,14 @@ export default function TLDashboard() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tasks.length > 0 ? (
               tasks.map((task) => (
-                <div
-                  key={task._id}
-                  className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                >
+                <div key={task._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
                   <div>
-                    <h3 className="font-bold text-emerald-400 text-lg mb-2">
-                      {task.title}
-                    </h3>
+                    <h3 className="font-bold text-emerald-400 text-lg mb-2">{task.title}</h3>
                     <p className="text-gray-300 mb-2">{task.description}</p>
-                    <p className="text-sm text-gray-400 mb-1">
-                      Project: {task.project?.name || "N/A"}
-                    </p>
-                    <p className="text-sm text-gray-400 mb-1">
-                      Assigned To: {task.assignedTo?.name || "N/A"}
-                    </p>
-                    <p className="text-sm font-medium text-gray-300">
-                      Status:{" "}
-                      <span className="text-emerald-400">{task.status || "Pending"}</span>
-                    </p>
+                    <p className="text-sm text-gray-400 mb-1">Project: {task.project?.name || "N/A"}</p>
+                    <p className="text-sm text-gray-400 mb-1">Assigned To: {task.assignedTo?.name || "N/A"}</p>
+                    <p className="text-sm font-medium text-gray-300">Status: <span className="text-emerald-400">{task.status || "Pending"}</span></p>
                   </div>
-
-                  {/* Delete Button */}
                   <button
                     onClick={() => handleDelete(task._id)}
                     className="mt-4 px-4 py-2 rounded-lg text-white font-medium shadow-lg transition 

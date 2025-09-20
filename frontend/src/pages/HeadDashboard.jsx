@@ -1,7 +1,8 @@
-// frontend/src/pages/HeadDashboard.jsx
 import { useEffect, useState } from "react";
-import API from "../api"; // Use centralized API instance
+import API from "../api"; // centralized API instance
 import Sidebar from "../components/Sidebar";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import {
   HomeIcon,
   BriefcaseIcon,
@@ -34,23 +35,21 @@ export default function HeadDashboard() {
 
   const fetchProjects = async () => {
     try {
-      const res = await API.get("/projects", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await API.get("/projects", { headers: { Authorization: `Bearer ${token}` } });
       setProjects(res.data || []);
     } catch (err) {
-      console.error("Failed to fetch projects:", err);
+      console.error(err);
+      toast.error("Failed to fetch projects");
     }
   };
 
   const fetchTLs = async () => {
     try {
-      const res = await API.get("/auth/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await API.get("/auth/all", { headers: { Authorization: `Bearer ${token}` } });
       setTls(res.data.filter((u) => u.role.toLowerCase() === "tl") || []);
     } catch (err) {
-      console.error("Failed to fetch TLs:", err);
+      console.error(err);
+      toast.error("Failed to fetch team leads");
     }
   };
 
@@ -58,21 +57,18 @@ export default function HeadDashboard() {
     e.preventDefault();
     try {
       if (editingId) {
-        // Update project
-        await API.put(`/projects/${editingId}`, form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await API.put(`/projects/${editingId}`, form, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success("Project updated successfully");
         setEditingId(null);
       } else {
-        // Create project
-        await API.post("/projects", form, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await API.post("/projects", form, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success("Project created successfully");
       }
       setForm({ name: "", description: "", deadline: "", tlId: "" });
       fetchProjects();
     } catch (err) {
-      console.error("Failed to submit project:", err);
+      console.error(err);
+      toast.error("Failed to submit project");
     }
   };
 
@@ -89,12 +85,12 @@ export default function HeadDashboard() {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        await API.delete(`/projects/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        await API.delete(`/projects/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success("Project deleted successfully");
         fetchProjects();
       } catch (err) {
-        console.error("Failed to delete project:", err);
+        console.error(err);
+        toast.error("Failed to delete project");
       }
     }
   };
@@ -104,9 +100,7 @@ export default function HeadDashboard() {
       <Sidebar links={links} />
 
       <main className="flex-1 p-8">
-        <h1 className="text-3xl font-extrabold mb-8 text-white">
-          Team Head Dashboard
-        </h1>
+        <h1 className="text-3xl font-extrabold mb-8 text-white">Team Head Dashboard</h1>
 
         {/* Create / Update Project Form */}
         <div className="bg-white/10 p-6 rounded-2xl shadow-md mb-10 backdrop-blur-md border border-white/20">
@@ -143,9 +137,7 @@ export default function HeadDashboard() {
             >
               <option value="">Assign to TL</option>
               {tls.map((tl) => (
-                <option key={tl._id} value={tl._id} className="text-slate-700">
-                  {tl.name}
-                </option>
+                <option key={tl._id} value={tl._id} className="text-slate-700">{tl.name}</option>
               ))}
             </select>
             <button
@@ -163,10 +155,7 @@ export default function HeadDashboard() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.length > 0 ? (
               projects.map((project) => (
-                <div
-                  key={project._id}
-                  className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                >
+                <div key={project._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between">
                   <div>
                     <h3 className="font-bold text-emerald-400 text-lg mb-2">{project.name}</h3>
                     <p className="text-gray-300 mb-2">{project.description}</p>
@@ -178,16 +167,10 @@ export default function HeadDashboard() {
                     </p>
                   </div>
                   <div className="flex mt-4 gap-2">
-                    <button
-                      onClick={() => handleEdit(project)}
-                      className="flex items-center gap-1 bg-blue-600/80 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition"
-                    >
+                    <button onClick={() => handleEdit(project)} className="flex items-center gap-1 bg-blue-600/80 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition">
                       <PencilSquareIcon className="w-4 h-4" /> Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(project._id)}
-                      className="flex items-center gap-1 bg-red-600/80 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
-                    >
+                    <button onClick={() => handleDelete(project._id)} className="flex items-center gap-1 bg-red-600/80 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition">
                       <TrashIcon className="w-4 h-4" /> Delete
                     </button>
                   </div>

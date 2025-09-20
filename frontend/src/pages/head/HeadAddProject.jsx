@@ -1,8 +1,7 @@
-// frontend/src/pages/head/HeadAddProject.jsx
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Sidebar from "../../components/Sidebar";
 import API from "../../api"; // Use centralized API instance
+import { toast } from "react-toastify";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function HeadAddProject() {
@@ -29,6 +28,7 @@ export default function HeadAddProject() {
       setTls(res.data.filter((u) => u.role.toLowerCase() === "tl") || []);
     } catch (err) {
       console.error("Failed to fetch TLs:", err);
+      toast.error("Failed to fetch TLs");
     }
   };
 
@@ -39,9 +39,10 @@ export default function HeadAddProject() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setForm({ name: "", description: "", deadline: "", tlId: "" });
-      alert("Project created successfully!");
+      toast.success("Project created successfully!");
     } catch (err) {
       console.error("Failed to create project:", err);
+      toast.error("Failed to create project");
     }
   };
 

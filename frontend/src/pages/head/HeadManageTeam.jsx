@@ -2,11 +2,13 @@
 import { useEffect, useState } from "react";
 import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
+import { toast } from "react-toastify";
 import { HomeIcon, BriefcaseIcon, PlusCircleIcon, UserIcon } from "@heroicons/react/24/outline";
 
 export default function HeadManageTeam() {
   const [tls, setTls] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
 
   const links = [
@@ -17,45 +19,34 @@ export default function HeadManageTeam() {
   ];
 
   useEffect(() => {
-    if (token) {
-      fetchTLs();
-      fetchEmployees();
-    }
+    if (token) fetchTeam();
   }, [token]);
 
-  const fetchTLs = async () => {
+  const fetchTeam = async () => {
+    setLoading(true);
     try {
-      const res = await API.get("/auth/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setTls(res.data.filter(u => u.role.toLowerCase() === "tl") || []);
+      const res = await API.get("/auth/all", { headers: { Authorization: `Bearer ${token}` } });
+      const allUsers = res.data || [];
+      setTls(allUsers.filter(u => u.role.toLowerCase() === "tl"));
+      setEmployees(allUsers.filter(u => u.role.toLowerCase() === "employee"));
     } catch (err) {
-      console.error("Failed to fetch TLs:", err);
+      console.error("Failed to fetch team:", err);
+      toast.error("Failed to fetch team members");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const fetchEmployees = async () => {
-    try {
-      const res = await API.get("/auth/all", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setEmployees(res.data.filter(u => u.role.toLowerCase() === "employee") || []);
-    } catch (err) {
-      console.error("Failed to fetch employees:", err);
-    }
-  };
+  const handleDelete = async (id, role) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
 
-  const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
-      try {
-        await API.delete(`/auth/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchTLs();
-        fetchEmployees();
-      } catch (err) {
-        console.error("Failed to delete user:", err);
-      }
+    try {
+      await API.delete(`/auth/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(`${role} deleted successfully!`);
+      fetchTeam();
+    } catch (err) {
+      console.error("Failed to delete user:", err);
+      toast.error("Failed to delete user");
     }
   };
 
@@ -66,41 +57,47 @@ export default function HeadManageTeam() {
       <main className="flex-1 p-8">
         <h1 className="text-3xl font-extrabold mb-8 text-white">Manage Team</h1>
 
-        {/* TL List */}
-        <div className="mb-10">
-          <h2 className="text-xl font-semibold text-emerald-400 mb-4">Team Leads</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {tls.length > 0 ? tls.map(tl => (
-              <div key={tl._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex justify-between items-center">
-                <span>{tl.name}</span>
-                <button
-                  onClick={() => handleDelete(tl._id)}
-                  className="px-3 py-1 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm"
-                >
-                  Delete
-                </button>
+        {loading ? (
+          <p className="text-gray-400">Loading team members...</p>
+        ) : (
+          <>
+            {/* TL List */}
+            <div className="mb-10">
+              <h2 className="text-xl font-semibold text-emerald-400 mb-4">Team Leads</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {tls.length > 0 ? tls.map(tl => (
+                  <div key={tl._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex justify-between items-center">
+                    <span className="truncate">{tl.name}</span>
+                    <button
+                      onClick={() => handleDelete(tl._id, "TL")}
+                      className="px-3 py-1 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )) : <p className="text-gray-400">No TLs found.</p>}
               </div>
-            )) : <p className="text-gray-400">No TLs found.</p>}
-          </div>
-        </div>
+            </div>
 
-        {/* Employee List */}
-        <div>
-          <h2 className="text-xl font-semibold text-emerald-400 mb-4">Employees</h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {employees.length > 0 ? employees.map(emp => (
-              <div key={emp._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex justify-between items-center">
-                <span>{emp.name}</span>
-                <button
-                  onClick={() => handleDelete(emp._id)}
-                  className="px-3 py-1 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm"
-                >
-                  Delete
-                </button>
+            {/* Employee List */}
+            <div>
+              <h2 className="text-xl font-semibold text-emerald-400 mb-4">Employees</h2>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {employees.length > 0 ? employees.map(emp => (
+                  <div key={emp._id} className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex justify-between items-center">
+                    <span className="truncate">{emp.name}</span>
+                    <button
+                      onClick={() => handleDelete(emp._id, "Employee")}
+                      className="px-3 py-1 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-sm transition"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                )) : <p className="text-gray-400">No employees found.</p>}
               </div>
-            )) : <p className="text-gray-400">No employees found.</p>}
-          </div>
-        </div>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );

@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import API from "../../api"; // Centralized API instance
 import Sidebar from "../../components/Sidebar";
+import { toast } from "react-toastify";
 import {
   HomeIcon,
   BriefcaseIcon,
@@ -13,6 +14,7 @@ import {
 
 export default function HeadProjectList() {
   const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(false);
   const token = localStorage.getItem("token");
 
   const links = [
@@ -27,6 +29,7 @@ export default function HeadProjectList() {
   }, [token]);
 
   const fetchProjects = async () => {
+    setLoading(true);
     try {
       const res = await API.get("/projects", {
         headers: { Authorization: `Bearer ${token}` },
@@ -34,19 +37,24 @@ export default function HeadProjectList() {
       setProjects(res.data || []);
     } catch (err) {
       console.error("Failed to fetch projects:", err);
+      toast.error("Failed to fetch projects");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this project?")) {
-      try {
-        await API.delete(`/projects/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        fetchProjects();
-      } catch (err) {
-        console.error("Failed to delete project:", err);
-      }
+    if (!window.confirm("Are you sure you want to delete this project?")) return;
+
+    try {
+      await API.delete(`/projects/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      toast.success("Project deleted successfully!");
+      fetchProjects();
+    } catch (err) {
+      console.error("Failed to delete project:", err);
+      toast.error("Failed to delete project");
     }
   };
 
@@ -57,45 +65,49 @@ export default function HeadProjectList() {
       <main className="flex-1 p-8">
         <h1 className="text-3xl font-extrabold mb-8 text-white">Projects</h1>
 
-        <div className="bg-white/10 p-6 rounded-2xl shadow-md backdrop-blur-md border border-white/20">
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.length > 0 ? (
-              projects.map((project) => (
-                <div
-                  key={project._id}
-                  className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="font-bold text-emerald-400 text-lg mb-2">{project.name}</h3>
-                    <p className="text-gray-300 mb-2">{project.description}</p>
-                    <p className="text-sm text-gray-400 mb-1">
-                      Deadline: {project.deadline ? new Date(project.deadline).toDateString() : "N/A"}
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Assigned TL: {project.assignedToTL?.name || "N/A"}
-                    </p>
+        {loading ? (
+          <p className="text-gray-400">Loading projects...</p>
+        ) : (
+          <div className="bg-white/10 p-6 rounded-2xl shadow-md backdrop-blur-md border border-white/20">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {projects.length > 0 ? (
+                projects.map((project) => (
+                  <div
+                    key={project._id}
+                    className="border border-white/20 rounded-xl p-5 bg-white/10 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                  >
+                    <div>
+                      <h3 className="font-bold text-emerald-400 text-lg mb-2">{project.name}</h3>
+                      <p className="text-gray-300 mb-2">{project.description}</p>
+                      <p className="text-sm text-gray-400 mb-1">
+                        Deadline: {project.deadline ? new Date(project.deadline).toDateString() : "N/A"}
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Assigned TL: {project.assignedToTL?.name || "N/A"}
+                      </p>
+                    </div>
+                    <div className="flex mt-4 gap-2">
+                      <button
+                        onClick={() => toast.info("Edit feature can be added here")}
+                        className="flex items-center gap-1 bg-blue-600/80 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition"
+                      >
+                        <PencilSquareIcon className="w-4 h-4" /> Edit
+                      </button>
+                      <button
+                        onClick={() => handleDelete(project._id)}
+                        className="flex items-center gap-1 bg-red-600/80 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
+                      >
+                        <TrashIcon className="w-4 h-4" /> Delete
+                      </button>
+                    </div>
                   </div>
-                  <div className="flex mt-4 gap-2">
-                    <button
-                      onClick={() => alert("Edit feature can be added here")}
-                      className="flex items-center gap-1 bg-blue-600/80 hover:bg-blue-600 text-white px-3 py-1 rounded-lg transition"
-                    >
-                      <PencilSquareIcon className="w-4 h-4" /> Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(project._id)}
-                      className="flex items-center gap-1 bg-red-600/80 hover:bg-red-600 text-white px-3 py-1 rounded-lg transition"
-                    >
-                      <TrashIcon className="w-4 h-4" /> Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-gray-400">No projects created yet.</p>
-            )}
+                ))
+              ) : (
+                <p className="text-gray-400">No projects created yet.</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
