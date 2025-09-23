@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Use Vite environment variable
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // backend base URL
+  baseURL:"https://pms-backend-vzh1.onrender.com/api", // backend base URL
 });
 
 // Automatically attach token
